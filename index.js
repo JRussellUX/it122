@@ -32,17 +32,6 @@ app.get('/about', (req,res) => {
    res.send('About page');
 });
 
-// Handle the request for a holiday
-app.get('/holiday/:holiday', (req, res, next) => {
-    // Get the holiday-parameter given
-    let holiday = req.params.holiday;
-    // Gets the object of this holiday
-    let holidayObject = getItem(holiday);
-    // If holiday not found, continue to next route (which will give 404)
-    if (holidayObject === undefined) return next();
-    // Display the colors of the holiday found
-    res.send(holidayObject.colors);
-})
   
 // For everything else, define 404 handler
 app.use((req,res) => {
