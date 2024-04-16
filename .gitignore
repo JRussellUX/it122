@@ -1,6 +1,7 @@
 # Configuration files
 .idea/
 .DS_Store
+credentials.js
 
 # Logs
 logs

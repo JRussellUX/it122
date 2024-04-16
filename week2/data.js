@@ -1,6 +1,5 @@
 const holidays = [
     {
-        key: 'christmas',
         name: 'Christmas',
         season: 'Winter',
         feeling: 'Jolly',
@@ -8,28 +7,24 @@ const holidays = [
         
     },
     {
-        key: 'halloween',
         name: 'Halloween',
         season: 'Fall',
         feeling: 'Spooky',
         colors: 'Black, Orange'
     },
     {
-        key: 'valentines',
         name: 'Valentines Day',
         season: 'Winter',
         feeling: 'Romantic',
         colors: 'Pink, Red'
     },
     {
-        key: 'independence',
         name: 'Independence Day',
         season: 'Summer',
         feeling: 'Patriotic',
         colors: 'Red, White, Blue'
     },
     {
-        key: 'newyears',
         name: 'New Years',
         season: 'Winter',
         feeling: 'Festive',
@@ -42,9 +37,9 @@ function getAll() {
     return holidays;
 }
 
-function getItem(key) {
+function getItem(name) {
     for (let i=0; i< holidays.length; i++) {
-        if(key === holidays[i].key){
+        if(name === holidays[i].name){
             return holidays[i];
         }
 

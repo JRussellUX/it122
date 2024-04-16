@@ -14,8 +14,8 @@ app.get('/', (req,res) => {
     res.render('home', {title: 'IT122', holidays: getAll()});
 });
 app.get('/details', (req,res) => {
-    let key = req.query.key; //getting param from URL
-    let holidayItem = getItem(key); //gets the holiday item corresponding to the key
+    let name = req.query.name; //getting param from URL
+    let holidayItem = getItem(name); //gets the holiday item corresponding to the key
     if (holidayItem === undefined){ // setting a 404 when undefined
         res.type('text/plain'); 
         res.status(404);
