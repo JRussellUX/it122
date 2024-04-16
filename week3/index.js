@@ -1,6 +1,7 @@
 'use strict'
 import express from 'express';
-import { Holiday, holidays } from './data.js';
+import { holidays } from './data.js';
+import { Holiday } from './models/Holiday.js';
 
 const app = express();
 app.set('port', process.env.PORT || 3000);
