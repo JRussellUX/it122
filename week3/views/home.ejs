@@ -11,7 +11,7 @@
 
     <ul>
         <% holidays.forEach(function(holidayItem){ %>
-            <li><a href="details?key=<%= holidayItem.key %>"><%= holidayItem.name %></a></li> 
+            <li><a href="details?name=<%= holidayItem.name %>"><%= holidayItem.name %></a></li> 
         <% }); %>
       </ul>
 </body>
