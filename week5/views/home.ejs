@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="public/css/style.css">
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>
+        <%= title %>
+    </title>
+</head>
+
+<body>
+    <h1>
+        <%= title %>
+    </h1>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const HolidayList = () => {
+            const holidays = <%- holidays %>;
+
+            const listHolidays = holidays.map((holiday) => <li>
+                <a href={"details?name=" + holiday.name}>{holiday.name}</a>
+            </li>);
+
+            return <div> <ul>{listHolidays}</ul></div>;
+        }
+
+        ReactDOM.render(<HolidayList />, document.getElementById('root'));
+    </script>
+
+</body>
+
+</html>
