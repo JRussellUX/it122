@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="public/css/style.css">
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>
+        <%= title %>
+    </title>
+</head>
+
+<body>
+    <h1>
+        <%= title %>
+    </h1>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const Details = (props) => {
+            return (
+                <div>
+                    <h3>Holiday Details</h3>
+                    {
+                        props.holiday &&                     
+                        <form>
+                            <b>Name:</b>
+                            <input
+                                type="text"
+                                name="name"
+                                value={props.holiday.name || ''}
+                                onChange={props.changeHandler}
+                            />
+                            <br />
+                            <b>Season:</b>
+                            <input
+                                type="text"
+                                name="season"
+                                value={props.holiday.season || ''}
+                                onChange={props.changeHandler}
+                            />
+                            <br />
+                            <b>Feeling:</b>
+                            <input
+                                type="text"
+                                name="feeling"
+                                value={props.holiday.feeling || ''}
+                                onChange={props.changeHandler}
+                            />
+                            <br />
+                            <b>Colors:</b>
+                            <input
+                                type="text"
+                                name="colors"
+                                value={props.holiday.colors || ''}
+                                onChange={props.changeHandler}
+                            />
+                        </form>
+                    }
+                </div>
+            );
+        }
+
+        const ListHolidays = (props) => {
+            const listHolidays = props.holidays.map((holiday) => 
+            <li key={holiday._id} id={holiday._id} onClick={props.clickHandler}>
+                <u>{holiday.name}</u>
+            </li>);
+            return <ul>{listHolidays}</ul>;
+        }
+
+        const MyApp = () => {
+            const [selectedHoliday, setSelectedHoliday] = React.useState();
+            const [holidays, setHolidays] = React.useState(<%- holidays %>);
+
+            const holidayClicked = (e) => {
+                let found = holidays.find((holiday) => { return holiday.name == e.target.innerText });
+                setSelectedHoliday(found);
+            }
+
+            const holidayChanged = (e) => {
+                let field = e.target.name;
+                let newHoliday = { ...selectedHoliday };
+                newHoliday[field] = e.target.value;
+                let newHolidays = holidays.map(holiday => {
+                    if (holiday.name == selectedHoliday.name) {
+                        return newHoliday;
+                    } else {
+                        return holiday;
+                    }  
+                });
+                console.log(newHolidays);
+                setHolidays(newHolidays);
+                setSelectedHoliday(newHoliday);
+            }
+
+            const clearDetails = () => {
+                setSelectedHoliday(undefined);
+            }
+
+            return (
+                <div>
+                    <h2>Holidays!</h2>
+                    <ListHolidays holidays={holidays} clickHandler={holidayClicked} />
+                    <hr />
+                    <Details holiday={selectedHoliday} changeHandler={holidayChanged}/>
+                    <hr />
+                    {
+                        selectedHoliday &&
+                        <button onClick={clearDetails}>Clear Details</button>
+                    }
+                </div>
+            );
+        }
+
+        ReactDOM.render(<MyApp />, document.getElementById('root'));
+    </script>
+
+</body>
+
+</html>
