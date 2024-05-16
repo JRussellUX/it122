@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="public/css/style.css">
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>
+        <%= title %>
+    </title>
+</head>
+
+<body>
+    <h1>
+        <%= title %>
+    </h1>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const Details = (props) => { // Component to display the holiday details
+            return (
+                <div>
+                    <h3>Holiday Details</h3>
+                    <form>
+                        <b>Name:</b>
+                        <input
+                            type="text"
+                            name="name"
+                            value={props.holiday.name || ''} // display name, if name is undefined display a blank string
+                            onChange={props.changeHandler}
+                        />
+                        <br />
+                        <b>Season:</b>
+                        <input
+                            type="text"
+                            name="season"
+                            value={props.holiday.season || ''}
+                            onChange={props.changeHandler}
+                        />
+                        <br />
+                        <b>Feeling:</b>
+                        <input
+                            type="text"
+                            name="feeling"
+                            value={props.holiday.feeling || ''}
+                            onChange={props.changeHandler}
+                        />
+                        <br />
+                        <b>Colors:</b>
+                        <input
+                            type="text"
+                            name="colors"
+                            value={props.holiday.colors || ''}
+                            onChange={props.changeHandler}
+                        />
+                        {
+                        props.holiday._id && 
+                        <p><small>(id: {props.holiday._id})</small></p>
+                    }
+                    </form>
+                </div>
+            );
+        }
+
+        const ListHolidays = (props) => { // Component to display the entire list
+            const listHolidays = props.holidays.map((holiday) =>
+                <li key={holiday._id} id={holiday._id} onClick={props.clickHandler}>
+                    <u>{holiday.name}</u>
+                </li>);
+            return <ul>{listHolidays}</ul>;
+        }
+
+        const MyApp = () => { // Component of main app
+            const [selectedHoliday, setSelectedHoliday] = React.useState({});
+            const [holidays, setHolidays] = React.useState(<%- holidays %>);
+
+            // Gets all holidays from the server
+            const reloadAllHolidays = () => {
+                fetch("/api/holidays")
+                .then(res => res.json())
+                .then((data) => {
+                    setHolidays(data);
+                    // Clear the details
+                    setSelectedHoliday({});
+                })
+            }
+
+            // Load data after component is loaded
+            React.useEffect(() => {
+                const fetchData = async () => {
+                    reloadAllHolidays();
+                };
+                fetchData();
+            }, []);
+
+            const holidayClicked = (event) => { // When a holiday is clicked inside the list
+                let clicked_item = event.target;
+                if (clicked_item.tagName == "U") { // If we are on the <u>, we need the parent <li> for the id
+                    clicked_item = clicked_item.parentElement;
+                }
+                let found = holidays.find((holiday) => { return holiday._id == clicked_item.id });
+                if (found) {
+                    setSelectedHoliday(found); // Will put the holiday in the details
+                }
+            }
+
+            const holidayChanged = (event) => { // When a change is made in an input field
+                let field = event.target.name;
+                let newHoliday = { ...selectedHoliday };
+                newHoliday[field] = event.target.value;
+                setSelectedHoliday(newHoliday); // Changes the selected holiday w/o updating the DB or list
+            }
+
+            const holidaySave = () => { // Save button action
+                if (selectedHoliday._id) {
+                    // This is the holiday already exists in the list
+                    let newHolidays = holidays.map(holiday => {
+                        if (holiday._id == selectedHoliday._id) {
+                            return { ...selectedHoliday };
+                        } else {
+                            return holiday;
+                        }
+                    });
+                    // Modify record in Db
+                    fetch("/api/holiday", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(selectedHoliday)
+                    })
+                        .then(() => {
+                            // Change the list only after changing it in the database, so we know it worked
+                            setHolidays(newHolidays);
+                            // Clear the details
+                            setSelectedHoliday({});
+                        })
+                } else {
+                    // This is a new holiday - added to the list
+                    // Add record in DB
+                    fetch("/api/holiday", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(selectedHoliday)
+                    })
+                        .then(result => result.json())
+                        .then((data) => {
+                            //  Add the holiday to the list (only after changing it in the database, so we know it worked)
+                            let newHoliday = {...selectedHoliday};
+                            newHoliday["_id"] = data.result._id;
+                            let newHolidays = [...holidays];
+                            newHolidays.push(newHoliday);
+                            setHolidays(newHolidays);
+                            // Clear the details
+                            setSelectedHoliday({});
+                        })
+                }
+            }
+
+            // Delete function
+            const holidayDelete = () => {
+                fetch(`/api/holiday/${selectedHoliday._id}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(selectedHoliday)
+                })
+                    .then(() => {
+                        // Update the list (only after changing it in the database, so we know it worked)
+                        let newHolidays = holidays.filter((holiday) => holiday._id != selectedHoliday._id);
+                        setHolidays(newHolidays);
+                        // Clear the details
+                        setSelectedHoliday({});
+                    })
+
+            }
+
+            const clearDetails = () => { // clear details button action
+                setSelectedHoliday({});
+            }
+
+            const resetDatabase = () => {
+                // Reset the database
+                fetch("/api/resetdb")
+                    .then(() => {
+                        // Reload the list of holidays
+                        reloadAllHolidays();
+                    })
+            }
+
+            return (
+                <div>
+                    <h2>Holidays!</h2>
+                    <ListHolidays holidays={holidays} clickHandler={holidayClicked} />
+                    <hr />
+                    <Details holiday={selectedHoliday} changeHandler={holidayChanged} />
+                    <hr />
+                    {
+                        selectedHoliday.name &&
+                        <button onClick={holidaySave}>Save</button>
+                    }
+                    {
+                        selectedHoliday._id &&
+                        <button onClick={holidayDelete}>Delete</button>
+                    }
+                    <button onClick={clearDetails}>Clear Details</button>
+                    <br />
+                    <button onClick={resetDatabase}>Reset Database</button>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<MyApp />, document.getElementById('root'));
+    </script>
+
+</body>
+
+</html>
